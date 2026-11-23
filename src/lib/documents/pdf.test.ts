@@ -3,7 +3,7 @@ import { minimalPdf } from "@/lib/verify/sectest";
 import { normalizeText } from "./normalize";
 import { extractPdfText } from "./pdf";
 
-/** 手元で生成した最小の PDF でテキスト抽出を確認する（教材の PDF は使わない） */
+/** 手元で生成した最小の PDF でテキスト抽出を確認する（学習用サンプルの PDF は使わない） */
 describe("extractPdfText", () => {
   it("1 ページの PDF からページ数と本文を取り出せる", async () => {
     const { totalPages, pages } = await extractPdfText(minimalPdf("Demo travel rules: hotel limit 12000 yen"));

@@ -29,7 +29,7 @@
 | [EVALUATION.md](./EVALUATION.md) | 精度検証の方法と結果記録（モック・実 API の結果記録済み。応答時間は再測定待ち） | ✅ / ⏳ |
 | [DELIVERY_CHECKLIST.md](./DELIVERY_CHECKLIST.md) | 納品チェックリスト（完了・検証待ち・未実施） | ✅ |
 | [WBS.md](./WBS.md) | WBS・見積もりと実績の比較 | ✅ / ⏳ |
-| [PHASE2_PROPOSAL.md](./PHASE2_PROPOSAL.md) | Phase 2 提案書・概算見積もり（教材の参考値） | ✅ |
+| [PHASE2_PROPOSAL.md](./PHASE2_PROPOSAL.md) | Phase 2 提案書・概算見積もり（参考値） | ✅ |
 | [RETROSPECTIVE.md](./RETROSPECTIVE.md) | 振り返り（KPT） | ✅ / ⏳ |
 
 ## 機能別の技術資料（開発者向け）

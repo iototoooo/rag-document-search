@@ -123,7 +123,7 @@ export function ChatPanel() {
             <p className="mb-2 text-base font-semibold text-zinc-700 dark:text-zinc-300">
               社内規程・マニュアルについて質問してください
             </p>
-            <p>例: 「出張の宿泊費の上限はいくらですか？」</p>
+            <p>知りたい内容を、具体的な言葉で入力してください。</p>
             <p className="mt-4 text-xs">
               回答は登録済みの社内文書のみを根拠に生成されます。重要な判断の前には出典を確認してください。
             </p>
