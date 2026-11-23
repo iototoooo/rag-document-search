@@ -1,0 +1,85 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- rag-document-search: 秘密情報・認証情報 ----
+# .env* は上で除外済み。テンプレートだけは共有する
+!.env.example
+*.key
+*.p12
+*.pfx
+*.crt
+credentials*.json
+service-account*.json
+*secret*.json
+.supabase/
+supabase/.temp/
+supabase/.branches/
+.npmrc
+
+# ---- 学習用サンプル資料（公開リポジトリに含めない） ----
+/samples/
+*.pdf
+*.csv
+*.xlsx
+*.docx
+/data/
+/uploads/
+
+# ---- 個人用・エディタ・OS ----
+.vscode/
+.idea/
+.cursor/
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+*.local.*
+*.log
+Thumbs.db
+desktop.ini
+*.swp
+*~
+/scratch/
+/tmp/
+/worktrees/
+
+# ---- 精度検証の出力（質問・回答・文書抜粋を含むため公開しない） ----
+/reports/
