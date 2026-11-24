@@ -233,7 +233,7 @@ npm run verify:db -- --app-url https://<本番ドメイン>
 
 | 区分 | 項目 |
 | --- | --- |
-| ✅ 実装済み・確認済み | RLS（anon 拒否・認証済みユーザーは internal のみ）、実 pgvector 検索、認証済みユーザーの PDF 取得、未登録ユーザーの拒否（T-1）、部署限定・restricted 文書の非表示（T-2・T-3）、検索・取り込み RPC の権限、非公開 Storage、未認証の 401 / 転送、秘密情報の混入なし（全コミット履歴を含む）、管理者キーを Vercel に置くとビルド中止、noindex、応答時間とトークン数のログ、東京リージョン指定（`vercel.json`）、`maxDuration`、API の利用上限、**GitHub 公開・Vercel 本番デプロイ、本番 URL でのログイン・回答生成・PDF 表示・未ログイン時の PDF 拒否、本番のセキュリティヘッダー、Firewall のレート制限（`/api/chat`・`/login`、Deny 403）、環境変数の Production 登録（API キーは Secret）、Deployment Protection（Preview の保護・Protected Sourcemaps）、Supabase Auth（新規登録・匿名ログイン OFF、メール確認 ON、パスワード要件 16 文字以上）、管理者パスワードの変更と再ログイン** |
+| ✅ 実装済み・確認済み | RLS（anon 拒否・認証済みユーザーは internal のみ）、実 pgvector 検索、認証済みユーザーの PDF 取得、未登録ユーザーの拒否（T-1）、部署限定・restricted 文書の非表示（T-2・T-3）、検索・取り込み RPC の権限、非公開 Storage、未認証の 401 / 転送、秘密情報の混入なし（全コミット履歴を含む）、管理者キーを Vercel に置くとビルド中止、noindex、応答時間とトークン数のログ、東京リージョン指定（`vercel.json`）、`maxDuration`、API の利用上限、**GitHub 公開・Vercel 本番デプロイ、本番 URL でのログイン・回答生成・PDF 表示・未ログイン時の PDF 拒否、本番のセキュリティヘッダー、Firewall のレート制限（`/api/chat`・`/login`、Deny 403）、環境変数の Production 登録（API キーは Secret）、Deployment Protection（Preview の保護・Protected Sourcemaps）、Supabase Auth（新規登録・匿名ログイン OFF、メール確認 ON、パスワード要件 16 文字以上）、管理者パスワードの変更と再ログイン、Supabase のリージョン（Northeast Asia (Tokyo)・`ap-northeast-1`）** |
 | 🟡 一部のみ・実環境で未検証 | Vercel 本番での応答時間、レート制限超過時の動作 |
-| ❓ 未確認（管理画面での確認が必要） | Supabase の URL 設定（Site URL・Redirect URLs）、Vercel 環境変数の Shared 設定、関数の実行リージョン（`hnd1`）、Supabase のリージョン（東京） |
+| ❓ 未確認（管理画面での確認が必要） | Supabase の URL 設定（Site URL・Redirect URLs）、Vercel 環境変数の Shared 設定、関数の実行リージョン（`hnd1`） |
 | ➖ Phase 2 | 共有ストアによるレート制限、監査ログ、SSO・MFA、部署別アクセス制御の本番運用 |

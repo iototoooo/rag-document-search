@@ -143,7 +143,7 @@
 - [x] セキュリティヘッダー（nosniff・X-Frame-Options）
 - [x] 画面からの手動確認: ログイン、回答生成、出典 PDF 表示、記載なし質問で「該当する情報が見つかりません」（利用者が実施）
 - [x] `npm run scan:secrets`: Git 管理下 127 ファイル・ブラウザ向けビルド 17 ファイルに、service_role・OpenAI・Anthropic のキーの値・形式なし
-- [ ] Supabase のリージョンが東京（利用者の報告のみ。管理画面での確認記録はなく**未確認**）
+- [x] Supabase のリージョンが東京（Northeast Asia (Tokyo)・`ap-northeast-1`。2026-11-24 に管理画面で確認）
 
 ### 確認済み（2026-11-24・Vercel 本番）
 
@@ -161,7 +161,6 @@
 - [ ] Vercel 環境変数の Shared 設定
 - [ ] Firewall のレート制限を超えたときの動作
 - [ ] Vercel 関数の実行リージョン（`vercel.json` で `hnd1` を指定済み。実行時の確認記録なし）
-- [ ] Supabase のリージョン（東京）
 - [ ] 本番 URL での `npm run verify:db`（T-5）
 
 ### 実施計画と状態

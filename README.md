@@ -45,7 +45,7 @@
 | 役割 | 採用技術 |
 | --- | --- |
 | フロントエンド / API | Next.js 16（App Router）+ TypeScript + Tailwind CSS |
-| DB・ベクトル検索・認証・ファイル | Supabase（PostgreSQL + pgvector + Auth + Storage）、東京リージョン（作成時に選択したと利用者が報告。管理画面での再確認記録はなし） |
+| DB・ベクトル検索・認証・ファイル | Supabase（PostgreSQL + pgvector + Auth + Storage）、東京リージョン（Northeast Asia (Tokyo)・`ap-northeast-1`。2026-11-24 に管理画面で確認済み） |
 | ホスティング | Vercel（関数リージョンを東京 `hnd1` に `vercel.json` で指定。関数が実際に `hnd1` で動いているかは管理画面で未確認） |
 | Embedding | OpenAI `text-embedding-3-small`（1536 次元・固定） |
 | 回答生成 | Claude API（既定 `claude-opus-5-5`、effort `low`。許可リスト: opus / sonnet / haiku 5.5） |

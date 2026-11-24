@@ -51,7 +51,7 @@
 | Supabase の URL 設定（Site URL・Redirect URLs） | ❓ 未確認（確認の記録なし） | [DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md) 6 章 |
 | 本番のセキュリティヘッダー（HSTS・`X-Frame-Options`・`X-Robots-Tag`） | ✅ 本番 URL の応答で確認（2026-11-24） | `curl` で `/login` のヘッダーを確認 |
 | 管理者パスワードの変更 | ✅ 管理 API で変更（2026-11-24）。新しいパスワードでログイン・ログアウト・再ログインを確認 | `auth.admin.updateUserById`（値は記録しない） |
-| Supabase リージョンが東京 | ❓ 利用者の報告のみ（管理画面での確認記録なし） | Dashboard の Project Settings で確認が必要 |
+| Supabase リージョンが東京 | ✅ 管理画面で確認（2026-11-24、Northeast Asia (Tokyo)・`ap-northeast-1`） | Supabase の管理画面（Project region） |
 | 残る懸念点の共有 | ✅ | [SECURITY.md](./SECURITY.md) 第 8 章 |
 
 ## 4. 公開・Git

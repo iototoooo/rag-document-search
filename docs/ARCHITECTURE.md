@@ -18,7 +18,7 @@ flowchart LR
     Authz["authorizeUser()<br/>getUser + app_users"]
   end
 
-  subgraph Supabase["Supabase（東京リージョン想定）"]
+  subgraph Supabase["Supabase（東京リージョン）"]
     Auth["Auth"]
     DB[("PostgreSQL + pgvector<br/>RLS 有効")]
     Storage[("Storage: documents<br/>非公開バケット")]
