@@ -19,7 +19,7 @@
 | [OPERATIONS.md](./OPERATIONS.md) | 管理者向け運用手順書（利用者管理、**PDF 追加・更新・再 Embedding・削除**、費用監視、キー管理、障害対応） | ✅ |
 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | トラブルシューティング | ✅ |
 | [SECURITY_TEST_T1-T3.md](./SECURITY_TEST_T1-T3.md) | 実環境セキュリティテスト T-1〜T-3（未登録ユーザー・部署限定・restricted）の手順・クリーンアップ・結果記録 | ✅ 2026-11-24 実施・合格 |
-| [DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md) | Vercel 公開前チェックリスト（公開前の必須事項、環境変数と設定場所、Preview の保護、Firewall・プラン別の対応、Supabase Auth の URL、デプロイ後の確認手順） | ✅ / ⏳ 公開後に記入 |
+| [DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md) | Vercel 公開前チェックリスト（公開前の必須事項、環境変数と設定場所、Preview の保護、Firewall・プラン別の対応、Supabase Auth の URL、デプロイ後の確認手順） | ✅（公開後の結果を記入済み。管理画面での確認項目が一部残る） |
 | [GITHUB_PUBLISH.md](./GITHUB_PUBLISH.md) | GitHub 公開準備（公開用リポジトリの作り方・確認結果、除外ファイル、推奨リポジトリ名、push 手順、今後の更新方法） | ✅ |
 
 ## 品質・プロジェクト管理
@@ -30,7 +30,7 @@
 | [DELIVERY_CHECKLIST.md](./DELIVERY_CHECKLIST.md) | 納品チェックリスト（完了・検証待ち・未実施） | ✅ |
 | [WBS.md](./WBS.md) | WBS・見積もりと実績の比較 | ✅ / ⏳ |
 | [PHASE2_PROPOSAL.md](./PHASE2_PROPOSAL.md) | Phase 2 提案書・概算見積もり（参考値） | ✅ |
-| [RETROSPECTIVE.md](./RETROSPECTIVE.md) | 振り返り（KPT） | ✅ / ⏳ |
+| [RETROSPECTIVE.md](./RETROSPECTIVE.md) | 振り返り（KPT、デプロイ時の問題と解決方法、精度改善の工夫、学び、Phase 2 の改善項目） | ✅ |
 
 ## 機能別の技術資料（開発者向け）
 

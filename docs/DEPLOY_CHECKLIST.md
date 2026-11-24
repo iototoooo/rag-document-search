@@ -1,9 +1,9 @@
 # Vercel 公開前チェックリスト
 
 社内文書検索 AI（RAG）を Vercel に公開する前後に確認する項目です。
-状態の凡例: ✅ 実装済み・確認済み / 🟡 実装済み・実環境で未検証 / ⬜ 未対応（公開前に必要） / ➖ Phase 2
+状態の凡例: ✅ 実装済み・確認済み / 🟡 一部のみ・実環境で未検証 / ⬜ 未対応 / ❓ 未確認（確認の記録なし） / ➖ Phase 2
 
-最終更新: 2026-11-24（ローカル + 開発用 Supabase 東京で確認。**Vercel 上では未検証**）
+最終更新: 2026-11-24（**Vercel 本番デプロイ済み**。本番 URL: https://rag-document-search-amber.vercel.app 。管理画面でしか確認できない項目のうち、確認の記録がないものは「未確認」としています）
 
 > Vercel のプラン・機能の提供条件は 2026-11 時点の情報です。変更されることがあるため、設定前に Vercel の公式ドキュメントで最新の条件を確認してください。
 
@@ -12,12 +12,12 @@
 | # | 必須事項 | 状態 | 参照 |
 | --- | --- | --- | --- |
 | M-1 | OpenAI / Anthropic の利用上限・自動チャージ設定 | ✅ 利用者が確認済み（2026-11-24） | 4 章 L-1 |
-| M-2 | Supabase Auth: サインアップ無効・メール確認有効 | 🟡 設定済みと報告あり。**公開直前に再確認** | 6 章 |
-| M-3 | Vercel 環境変数を **Production のみ**に、許可された変数だけ登録（Preview には登録しない） | ⬜ | 1 章・2 章 |
-| M-4 | Deployment Protection（Vercel Authentication・Standard Protection）が有効 | ⬜ | 2 章 |
-| M-5 | Supabase URL Configuration（Site URL・Redirect URLs）を本番 URL に変更 | ⬜ | 6 章 |
-| M-6 | Vercel Firewall のレート制限ルール（`/api/chat`・`/login`） | ⬜ 強く推奨（プランの上限内で設定） | 4 章 L-2 |
-| M-7 | 公開後の確認（7 章）がすべて OK | ⬜ | 7 章 |
+| M-2 | Supabase Auth: サインアップ無効・メール確認有効 | ✅ 管理画面で確認（利用者）: Allow new users to sign up OFF、Allow anonymous sign-ins OFF、Confirm email ON。パスワードは 16 文字以上・英大文字・英小文字・数字・記号が必須 | 6 章 |
+| M-3 | Vercel 環境変数を **Production のみ**に、許可された変数だけ登録（Preview には登録しない） | ✅ 5 件を Production に登録（利用者が確認）。`OPENAI_API_KEY`・`ANTHROPIC_API_KEY` は Secret、その他 3 件は Config。Preview・Development への同じ変数の登録は見つかっていない。❓ Shared 設定は未確認。本番ビルドが成功しているため、ビルド時点で管理者用の変数は設定されていない | 1 章・2 章 |
+| M-4 | Deployment Protection（Vercel Authentication・Standard Protection）が有効 | ✅ Vercel Authentication ON・Standard Protection で Preview を保護。Protected Sourcemaps ON（利用者が確認） | 2 章 |
+| M-5 | Supabase URL Configuration（Site URL・Redirect URLs）を本番 URL に変更 | ❓ 未確認 | 6 章 |
+| M-6 | Vercel Firewall のレート制限ルール（`/api/chat`・`/login`） | ✅ 1 件のルール内で OR 条件により両方を指定。IP ごと 60 秒 20 回（合算）、Deny（403）。設定後もログイン・AI 検索の正常動作を確認（利用者）。❓ 超過時の動作は未検証 | 4 章 L-2 |
+| M-7 | 公開後の確認（7 章）がすべて OK | 🟡 一部完了（7 章） | 7 章 |
 
 ## 1. 環境変数
 
@@ -26,6 +26,7 @@
 Vercel Dashboard > 対象プロジェクト > **Settings > Environment Variables**。
 各変数の **Environments は「Production」だけ**にチェックします（Preview・Development には登録しない。理由は 2 章）。
 `NEXT_PUBLIC_` 以外は **Sensitive** を有効にします（登録後に画面で値を表示できなくなる）。
+本番では、API キー 2 件（`OPENAI_API_KEY`・`ANTHROPIC_API_KEY`）を Secret、その他 3 件を Config として登録しています。`ALLOWED_EMAIL_DOMAINS` は秘密の値ではないため Config で問題ありません。
 
 ### Vercel に設定してよいもの
 
@@ -96,7 +97,7 @@ Vercel は複数インスタンスで処理するため、実効値はインス�
 | # | 対応策 | 効果 | 状態 |
 | --- | --- | --- | --- |
 | L-1 | OpenAI / Anthropic の**利用上限（月額）**・自動チャージの確認 | 被害額の上限を固定する。**最も確実** | ✅ 利用者が確認済み（2026-11-24） |
-| L-2 | Vercel Firewall のレート制限ルール | IP 単位で全インスタンス共通に制限 | ⬜ 下表 |
+| L-2 | Vercel Firewall のレート制限ルール | IP 単位で全インスタンス共通に制限 | ✅ `/api/chat`・`/login` を 1 件のルールで設定（IP ごと 60 秒 20 回・Deny 403）。超過時の動作は未検証 |
 | L-3 | 共有ストア（Upstash Redis など）でユーザー単位の制限を実装 | ユーザー単位で正確に制限 | ➖ Phase 2（外部サービスの追加が必要） |
 | L-4 | `[metric:api_chat]` ログ（応答時間の内訳・トークン数）で監視 | 異常の早期発見 | 🟡 ログ出力は実装済み |
 | L-5 | `/api/chat` の `maxDuration = 60` 秒 | 応答が返らないリクエストが長時間課金され続けるのを防ぐ | ✅ 実装済み（テストで検査） |
@@ -115,6 +116,17 @@ Vercel は複数インスタンスで処理するため、実効値はインス�
 
 ルールの作成後、レート制限ルールは最初に **Log（記録のみ）** で数日動かし、正常な利用が止まらないことを確認してから **Deny** に切り替えると安全です。
 
+**本番の設定（2026-11-24・利用者が設定・確認）**: Hobby プランではレート制限ルールを 1 件しか作れないため、1 件のルール内で `/api/chat` と `/login` を OR 条件で指定しています。
+
+| 項目 | 設定値 |
+| --- | --- |
+| 対象 | `/api/chat` または `/login` |
+| 上限 | IP ごとに 60 秒 20 回（2 つのパスの合算） |
+| 超過時の動作 | Deny（403） |
+| 確認結果 | 設定後もログイン・AI 検索が正常に動くことを確認。**上限を超えたときの動作は未検証** |
+
+上表の「本アプリでの設定」列は当初の推奨値です。実際の設定は上記のとおりです。
+
 ## 5. 公開 URL から社内情報が見えないための条件
 
 - [x] 全ページがログイン必須（`proxy.ts` で転送 + ページ側で `authorizeUser()`）
@@ -124,10 +136,10 @@ Vercel は複数インスタンスで処理するため、実効値はインス�
 - [x] ページ・API・PDF に `noindex`（メタデータと `X-Robots-Tag`）
 - [x] ブラウザ向けファイルに秘密の値が含まれない（`npm run scan:secrets`、2026-11-24 のビルドで OK）
 - [x] Vercel 上のビルドで管理者用の変数を検出したらビルド中止
-- [ ] Supabase Auth: サインアップ無効・メール確認有効（M-2）
-- [ ] Preview の保護（2 章 P-1・P-2）
-- [ ] Supabase URL Configuration（6 章）
-- [ ] 本番 URL で 7 章の確認
+- [x] Supabase Auth: サインアップ無効・メール確認有効（M-2）
+- [x] Preview の保護（2 章 P-1・P-2。Shared 設定は未確認）
+- [ ] Supabase URL Configuration（6 章。未確認）
+- [ ] 本番 URL で 7 章の確認（一部完了）
 
 ## 6. Supabase Auth の設定（Dashboard）
 
@@ -135,7 +147,8 @@ Vercel は複数インスタンスで処理するため、実効値はインス�
 | --- | --- | --- |
 | Authentication > Sign In / Providers > Email | Allow new users to sign up | **無効**（自己登録を禁止。公開 URL から第三者がアカウントを作れないようにする） |
 | 〃 | Confirm email | 有効 |
-| 〃 | パスワードの最小長 | 12 文字以上を推奨 |
+| 〃 | パスワードの最小長 | 12 文字以上を推奨（**本番は 16 文字以上・英大文字・英小文字・数字・記号必須に設定済み**） |
+| Authentication > Sign In / Providers | Allow anonymous sign-ins | **無効**（本番で OFF を確認済み） |
 | Authentication > URL Configuration | **Site URL** | `https://<本番ドメイン>`（例: `https://<プロジェクト名>.vercel.app`） |
 | 〃 | **Redirect URLs** | `https://<本番ドメイン>/**` のみ。**`https://*.vercel.app/**` のようなワイルドカードは登録しない**。同じ Supabase をローカル開発にも使う間は `http://localhost:3000/**` を残してよい |
 | Authentication > Rate Limits | サインイン試行の制限 | 既定値以上の厳しさを維持 |
@@ -156,6 +169,16 @@ Redirect URLs は「Supabase から送られるメールのリンク先」を本
 | 3b | `curl.exe -s -D - -o NUL -X POST https://<本番ドメイン>/api/chat` | 401。`x-vercel-id` の最後の `::` の直前（関数の実行リージョン）が `hnd1` |
 | 4 | Preview の URL（Deployments の一覧から）をシークレットウィンドウで開く | Vercel のログイン画面が出る（P-2） |
 
+**結果（2026-11-24）**:
+
+| # | 結果 |
+| --- | --- |
+| 1 | ❓ 未確認（ビルドは成功し本番が動作しているため、ビルド中止のエラーは出ていない） |
+| 2 | ❓ 未確認（管理画面での確認記録なし） |
+| 3 | ✅ `/login` の応答に `Strict-Transport-Security`・`X-Frame-Options: SAMEORIGIN`・`X-Robots-Tag: noindex, nofollow` を確認 |
+| 3b | ⬜ 未実施（`x-vercel-id` は `hnd1` で始まるが、静的ページの応答のため関数の実行リージョンは判別できない） |
+| 4 | ✅ 管理画面で Vercel Authentication ON（Standard Protection）・Protected Sourcemaps ON を確認（利用者）。シークレットウィンドウでの表示確認の記録はなし |
+
 ### 7-2. 未認証アクセスの拒否（課金なし・読み取りのみ）
 
 ```powershell
@@ -173,6 +196,12 @@ npm run verify:db -- --app-url https://<本番ドメイン>
 | 3 | 開発者ツール（Network / Sources）で `OPENAI`・`ANTHROPIC`・`service_role`・`sb_secret` を検索 | 見つからない |
 | 4 | ログアウトし、出典 PDF の URL（`/api/documents/<ID>/file`）を直接開く | 401 |
 
+**結果（2026-11-24・利用者が確認）**: #2 ログインできた。#4 未ログインで PDF の URL を開いても表示されない。#1・#3 は確認記録なし。`npm run verify:db` の本番 URL での実行（7-2）も未実施。
+
+### 7-3b. 本番での回答生成の結果（2026-11-24・利用者が確認）
+
+本番 URL で AI 検索・回答生成・出典 PDF の表示が成功した。7-4 の #2〜#4（該当なしの質問、ログの内容、Usage 画面）は確認記録なし。
+
 ### 7-4. 回答生成（⚠ 課金あり: 2 問で 約 $0.05 以下）
 
 | # | 操作 | 期待結果 |
@@ -185,7 +214,7 @@ npm run verify:db -- --app-url https://<本番ドメイン>
 ### 7-5. 最終確認
 
 - [ ] `npm run scan:secrets`（公開リポジトリと手元のビルドに秘密の値がない）
-- [ ] Vercel Firewall のレート制限ルールが有効（最初は Log、問題なければ Deny）
+- [x] Vercel Firewall のレート制限ルールが有効（`/api/chat`・`/login`、Deny 403。超過時の動作は未検証）
 - [ ] 確認で使ったテスト用の値を `.env.local` から消した
 
 （任意）未登録ユーザーの拒否を本番 URL でも確かめる場合は、[T-1〜T-3 の手順](./SECURITY_TEST_T1-T3.md)の T-1 部分（Auth ユーザーの追加・削除）を再度承認のうえ実施します。アプリと DB は開発時と同じため、必須ではありません。
@@ -204,7 +233,7 @@ npm run verify:db -- --app-url https://<本番ドメイン>
 
 | 区分 | 項目 |
 | --- | --- |
-| ✅ 実装済み・確認済み | RLS（anon 拒否・認証済みユーザーは internal のみ）、実 pgvector 検索、認証済みユーザーの PDF 取得、未登録ユーザーの拒否（T-1）、部署限定・restricted 文書の非表示（T-2・T-3）、検索・取り込み RPC の権限、非公開 Storage、未認証の 401 / 転送、秘密情報の混入なし（全コミット履歴を含む）、管理者キーを Vercel に置くとビルド中止、noindex、応答時間とトークン数のログ、東京リージョン指定（`vercel.json`）、`maxDuration`、API の利用上限 |
-| 🟡 実装済み・実環境で未検証 | 本番 URL での動作、Tokyo リージョンでの応答時間、サインアップ無効の再確認 |
-| ⬜ 未対応（公開前に必要） | Vercel 環境変数（Production のみ）、Deployment Protection、Firewall のレート制限、Supabase の URL 設定、本番 URL での確認 |
+| ✅ 実装済み・確認済み | RLS（anon 拒否・認証済みユーザーは internal のみ）、実 pgvector 検索、認証済みユーザーの PDF 取得、未登録ユーザーの拒否（T-1）、部署限定・restricted 文書の非表示（T-2・T-3）、検索・取り込み RPC の権限、非公開 Storage、未認証の 401 / 転送、秘密情報の混入なし（全コミット履歴を含む）、管理者キーを Vercel に置くとビルド中止、noindex、応答時間とトークン数のログ、東京リージョン指定（`vercel.json`）、`maxDuration`、API の利用上限、**GitHub 公開・Vercel 本番デプロイ、本番 URL でのログイン・回答生成・PDF 表示・未ログイン時の PDF 拒否、本番のセキュリティヘッダー、Firewall のレート制限（`/api/chat`・`/login`、Deny 403）、環境変数の Production 登録（API キーは Secret）、Deployment Protection（Preview の保護・Protected Sourcemaps）、Supabase Auth（新規登録・匿名ログイン OFF、メール確認 ON、パスワード要件 16 文字以上）、管理者パスワードの変更と再ログイン** |
+| 🟡 一部のみ・実環境で未検証 | Vercel 本番での応答時間、レート制限超過時の動作 |
+| ❓ 未確認（管理画面での確認が必要） | Supabase の URL 設定（Site URL・Redirect URLs）、Vercel 環境変数の Shared 設定、関数の実行リージョン（`hnd1`）、Supabase のリージョン（東京） |
 | ➖ Phase 2 | 共有ストアによるレート制限、監査ログ、SSO・MFA、部署別アクセス制御の本番運用 |

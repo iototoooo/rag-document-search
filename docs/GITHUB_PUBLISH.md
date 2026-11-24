@@ -1,6 +1,6 @@
 # GitHub 公開準備
 
-最終確認: 2026-11-24（公開用リポジトリのローカル初期コミット。**GitHub への push は未実施**）
+最終確認: 2026-11-24（https://github.com/iototoooo/rag-document-search へ push 済み。Vercel の Production にデプロイ済み）
 
 ## 1. 公開用リポジトリの作り方
 

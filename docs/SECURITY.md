@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | 対象 | 社内文書検索AI（RAG）Phase 1 MVP |
-| 最終確認日 | 2026-11-24（コード・SQL レビュー + 開発用 Supabase 東京での実環境確認。Vercel 上では未確認） |
+| 最終確認日 | 2026-11-24（コード・SQL レビュー、実 DB での確認、Vercel 本番の設定確認。本番 URL: https://rag-document-search-amber.vercel.app 。未確認の項目は 9 章に明記） |
 | 注意 | 本書は設計と確認結果の記録であり、SOC2 等の認証取得や規格への完全準拠を保証するものではありません。 |
 
 ## 1. 基本方針
@@ -113,18 +113,18 @@
 
 | # | 懸念 | 影響 | 推奨対応 |
 | --- | --- | --- | --- |
-| R-1 | レート制限がプロセス内メモリのため、Vercel の複数インスタンスでは効かない | 大量リクエストによる API 課金 | Vercel Firewall のレート制限、または Upstash 等の共有ストア。各 API の利用上限（Spend limit）設定 |
+| R-1 | レート制限がプロセス内メモリのため、Vercel の複数インスタンスでは効かない | 大量リクエストによる API 課金 | **対応済み**: Vercel Firewall で `/api/chat`・`/login` を IP ごと 60 秒 20 回（Deny 403）に制限、各 API の利用上限を設定。超過時の動作は未検証。ユーザー単位の正確な制限（Upstash 等の共有ストア）は Phase 2 |
 | R-2 | 文書を更新すると古い PDF が Storage に残る | 利用者からは読めない（どの文書行とも一致しないため）が、データ最小化の観点で不要データが残る | 管理者が Dashboard で削除（[運用手順書](./OPERATIONS.md)）。Phase 2 で自動化 |
 | R-3 | HNSW インデックスは RLS の絞り込みを後から適用するため、見えない文書が大量にあると上位件数が減る | 部署限定文書を増やしたときの検索漏れ | pgvector の iterative scan 設定、部署別インデックス（Phase 2） |
 | R-4 | 文書抜粋と質問が外部 API に送信される | 実在文書の場合の情報管理 | 実文書投入前に各社のデータ保持・学習利用の条件を確認し、社内承認を得る |
-| R-5 | ログイン試行のブルートフォース | アカウント乗っ取り | Supabase Auth のレート制限確認、強いパスワード、MFA・CAPTCHA（Phase 2） |
+| R-5 | ログイン試行のブルートフォース | アカウント乗っ取り | **対応済み**: Vercel Firewall で `/login` を IP ごと 60 秒 20 回に制限、Supabase のパスワード要件を 16 文字以上・英大文字・英小文字・数字・記号必須に設定、管理者パスワードを変更。MFA・CAPTCHA は Phase 2 |
 | R-6 | 監査ログ（誰がどの文書を見たか）を残していない | 事後調査が難しい | 本文を含まないアクセスログの設計（Phase 2） |
 | R-7 | 出典 PDF に CSP `sandbox` を付けていない | ブラウザ内蔵ビューアとの互換性を優先 | 実ブラウザで確認のうえ再検討 |
 | R-8 | `ALLOWED_EMAIL_DOMAINS` が学習用の設定（個人向けメールサービスのドメイン） | 誰でもアドレスを作れるドメインのため絞り込み効果はない（第三者の利用はサインアップ無効と `app_users` 登録で防いでいる） | 社内利用時は会社のドメインに変更し、SSO・MFA を導入（[公開前チェックリスト](./DEPLOY_CHECKLIST.md) 8 章） |
 | R-9 | 取り込み CLI を使う管理者 PC に service_role キーがある | 漏えい時は RLS を迂回される | PC の管理、漏えい時は即時ローテーション（[運用手順書](./OPERATIONS.md)） |
 | R-10 | （解消）認証済みユーザー・未登録ユーザー・部署限定文書の実 DB 検証 | — | 9 章の T-0〜T-3 で確認済み（2026-11-24）。本番 URL での再確認（T-5）のみ残る |
-| R-12 | Preview デプロイに本番と同じ環境変数を設定すると、レビュー前のコードが本番データに接続された URL を持つ | 未レビューのコードによる漏えい・課金 | 環境変数は Production のみ、Deployment Protection を有効化（[公開前チェックリスト](./DEPLOY_CHECKLIST.md) 2 章） |
-| R-11 | レート制限が複数インスタンスで共有されない（R-1 の詳細） | 課金の増加（情報漏えいではない） | [公開前チェックリスト](./DEPLOY_CHECKLIST.md) 4 章（利用上限・Vercel Firewall） |
+| R-12 | Preview デプロイに本番と同じ環境変数を設定すると、レビュー前のコードが本番データに接続された URL を持つ | 未レビューのコードによる漏えい・課金 | **対応済み**: 環境変数 5 件を Production に登録（Preview・Development への登録は見つかっていない。Shared 設定は未確認）、Deployment Protection（Vercel Authentication・Standard Protection）で Preview を保護（[公開前チェックリスト](./DEPLOY_CHECKLIST.md) 2 章） |
+| R-11 | レート制限が複数インスタンスで共有されない（R-1 の詳細） | 課金の増加（情報漏えいではない） | **対応済み**（R-1 と同じ。[公開前チェックリスト](./DEPLOY_CHECKLIST.md) 4 章） |
 
 ## 9. 実環境での確認
 
@@ -143,7 +143,26 @@
 - [x] セキュリティヘッダー（nosniff・X-Frame-Options）
 - [x] 画面からの手動確認: ログイン、回答生成、出典 PDF 表示、記載なし質問で「該当する情報が見つかりません」（利用者が実施）
 - [x] `npm run scan:secrets`: Git 管理下 127 ファイル・ブラウザ向けビルド 17 ファイルに、service_role・OpenAI・Anthropic のキーの値・形式なし
-- [x] Supabase のリージョンが東京（利用者の報告）
+- [ ] Supabase のリージョンが東京（利用者の報告のみ。管理画面での確認記録はなく**未確認**）
+
+### 確認済み（2026-11-24・Vercel 本番）
+
+- [x] GitHub の `main` を Vercel の Production にデプロイ。本番 URL でログイン・AI 検索・回答生成・出典 PDF 表示が成功、未ログインで出典 PDF の URL を開いても表示されない（利用者が確認）
+- [x] 本番 URL の応答に `Strict-Transport-Security`・`X-Frame-Options: SAMEORIGIN`・`X-Robots-Tag: noindex, nofollow`
+- [x] Vercel の環境変数: 5 件を Production に登録。`OPENAI_API_KEY`・`ANTHROPIC_API_KEY` は Secret、その他 3 件は Config。Preview・Development への同じ変数の登録は見つかっていない（利用者が確認）
+- [x] Deployment Protection: Vercel Authentication ON（Standard Protection）で Preview を保護、Protected Sourcemaps ON（利用者が確認）
+- [x] Vercel Firewall: 1 件のレート制限ルール内で `/api/chat` と `/login` を OR 条件で指定、IP ごと 60 秒 20 回（合算）、Deny（403）。設定後もログイン・AI 検索が正常に動く（利用者が確認）
+- [x] Supabase Auth: Allow new users to sign up OFF、Allow anonymous sign-ins OFF、Confirm email ON、パスワードは 16 文字以上・英大文字・英小文字・数字・記号必須（利用者が管理画面で確認）
+- [x] 管理者パスワードを管理 API（`auth.admin.updateUserById`）で変更し、新しいパスワードでログイン・ログアウト・再ログインを確認
+
+### 未確認（2026-11-24 時点）
+
+- [ ] Supabase の URL 設定（Site URL・Redirect URLs が本番 URL のみか）
+- [ ] Vercel 環境変数の Shared 設定
+- [ ] Firewall のレート制限を超えたときの動作
+- [ ] Vercel 関数の実行リージョン（`vercel.json` で `hnd1` を指定済み。実行時の確認記録なし）
+- [ ] Supabase のリージョン（東京）
+- [ ] 本番 URL での `npm run verify:db`（T-5）
 
 ### 実施計画と状態
 
@@ -153,8 +172,8 @@
 | T-1 | `app_users` 未登録ユーザーの拒否（DB・Storage・API 403・画面） | [T-1〜T-3 手順と記録](./SECURITY_TEST_T1-T3.md)。Dashboard で未登録ユーザーを 1 人作成 → `npm run sectest -- verify` | **あり**（Auth ユーザー 1 人の追加・削除） | ✅ 2026-11-24 合格 |
 | T-2 | 部署限定（`department`）文書が見えない（一覧・件数・ID 指定・検索・出典・Storage・PDF API） | 同上。`npm run sectest -- setup --execute` でダミー文書を作成（合成 Embedding・AI API なし） | **あり**（文書 1・チャンク 1・Storage 1 の追加・削除） | ✅ 2026-11-24 合格 |
 | T-3 | `restricted` 文書が見えない（同上） | 同上 | **あり**（同上） | ✅ 2026-11-24 合格 |
-| T-4 | 検証後の後片付け | `npm run sectest -- cleanup --execute`（記録した ID のみ削除・前後の件数照合）、Dashboard でユーザー削除 | **あり**（削除） | ✅ テストデータ削除済み・文書 5 / チャンク 14 に復帰（T-1 の Auth ユーザーは利用者が削除予定） |
-| T-5 | 本番 URL での再確認 | Vercel 公開後に `npm run verify:db -- --app-url https://<本番URL>` | なし | 公開後 |
+| T-4 | 検証後の後片付け | `npm run sectest -- cleanup --execute`（記録した ID のみ削除・前後の件数照合）、Dashboard でユーザー削除 | **あり**（削除） | ✅ テストデータ削除済み・文書 5 / チャンク 14 に復帰。Auth ユーザーは管理者 1 件のみ（2026-11-24 に読み取りで確認。T-1 のテストユーザーは削除済み） |
+| T-5 | 本番 URL での再確認 | Vercel 公開後に `npm run verify:db -- --app-url https://<本番URL>` | なし | ⬜ 未実施（ログイン・回答・PDF 表示・未ログイン時の PDF 拒否は画面で確認済み） |
 
 T-2・T-3 は「部署限定文書は権限チェックの実装・検証が完了するまで利用対象にしない」方針のため、**本番データには入れず、開発用プロジェクトでダミー文書を使う**。
 現在の RLS は `visibility = 'internal'` だけを許可しているため、department / restricted は全利用者から見えない設計（静的テスト・確認 SQL で確認済み）。T-2・T-3 はそれを実データで裏付けるもの。

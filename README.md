@@ -5,13 +5,23 @@
 
 **学習用のダミー資料のみを使用します。実在の社内文書は取り込まないでください。**
 
+## 本番環境
+
+| 項目 | 内容 |
+| --- | --- |
+| 本番 URL | https://rag-document-search-amber.vercel.app （**ログイン必須**。アカウントは管理者が発行し、自己登録はできません） |
+| デプロイ | GitHub の `main` ブランチを Vercel の Production にデプロイ |
+| ソースコード | https://github.com/iototoooo/rag-document-search |
+
 ## 現在の状態（2026-11-24）
 
 | 区分 | 内容 |
 | --- | --- |
-| ✅ 完了（実環境で確認） | Supabase 東京への SQL 適用・文書 5 件の取り込み、**正答率 100%（12/12）**・記載なし 2 問で「該当なし」2/2（実 API・1 回。**学習用サンプル 5 文書・テスト質問 12 問での実測**で、他の文書や本リポジトリの架空データで同じ結果を保証するものではありません）、実 DB での権限確認（未認証・未登録ユーザーの拒否、部署限定・restricted 文書の非表示: [T-1〜T-3](docs/SECURITY_TEST_T1-T3.md) 31/31 合格）、画面でのログイン・回答・出典 PDF 表示 |
-| ⚠ **未達** | 応答時間 p95 5 秒以内（実測 p95 7.7 秒。12 問中 1 問だけ遅く、原因は未特定・再測定待ち。[EVALUATION.md](docs/EVALUATION.md)） |
-| ⬜ 未実施 | GitHub への push、Vercel へのデプロイと公開後の確認（[公開前チェックリスト](docs/DEPLOY_CHECKLIST.md)）、スマートフォン実機での確認、PDF 200 件規模での取り込み |
+| ✅ 完了（実環境で確認） | GitHub への公開、Vercel 本番へのデプロイ、本番 URL でのログイン・回答生成・出典 PDF 表示、未ログインで出典 PDF の URL を開いても表示されないこと |
+| ✅ 完了（実環境で確認） | Supabase への SQL 適用・文書 5 件（14 チャンク）の取り込み、実 DB での権限確認（未認証・未登録ユーザーの拒否、部署限定・restricted 文書の非表示: [T-1〜T-3](docs/SECURITY_TEST_T1-T3.md) 31/31 合格） |
+| ✅ **正答率 100%（12/12）** | 文書に記載のある 10 問すべて正答、記載のない 2 問はすべて「該当なし」（2026-11-23・実 API 1 回。**学習用サンプル 5 文書・テスト質問 12 問での実測**で、他の文書や本リポジトリの架空データで同じ結果を保証するものではありません。[EVALUATION.md](docs/EVALUATION.md)） |
+| ⚠ **未達** | 応答時間 5 秒以内: 実測は**中央値 2.0 秒・最大 7.7 秒**で、12 問中 1 問が 5 秒を超えました（p95 7.7 秒）。原因は未特定で、再測定は未実施です。測定はローカルで行い、Vercel 本番での応答時間は未測定です |
+| ⬜ 未実施 | PDF 200 件規模での取り込み（学習用サンプル 5 件で検証。200 件規模の取り込みは行っていません）、スマートフォン実機での確認 |
 
 詳細は [docs/DELIVERY_CHECKLIST.md](docs/DELIVERY_CHECKLIST.md)。
 
@@ -20,19 +30,23 @@
 | 資料 | 内容 |
 | --- | --- |
 | [docs/README.md](docs/README.md) | 納品資料の一覧（ここから辿れます） |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | アーキテクチャ図（構成図・シーケンス図・ER 図）と共通仕様 |
 | [docs/SETUP.md](docs/SETUP.md) | 初期設定マニュアル（Supabase・API・Vercel） |
 | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | 利用者向け操作マニュアル |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | 管理者向け運用手順（PDF 追加・更新・再 Embedding を含む） |
+| [docs/EVALUATION.md](docs/EVALUATION.md) | 精度検証の方法と結果（正答率・該当なし・応答時間） |
 | [docs/SECURITY.md](docs/SECURITY.md) | セキュリティ設計書（確認結果・残る懸念点） |
-| [docs/DEPLOY_CHECKLIST.md](docs/DEPLOY_CHECKLIST.md) | Vercel 公開前チェックリスト（環境変数・Preview の保護・Firewall・公開後の確認） |
+| [docs/DEPLOY_CHECKLIST.md](docs/DEPLOY_CHECKLIST.md) | Vercel 公開チェックリスト（環境変数・Preview の保護・Firewall・公開後の確認） |
+| [docs/PHASE2_PROPOSAL.md](docs/PHASE2_PROPOSAL.md) | Phase 2 提案書・概算見積もり |
+| [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) | 振り返り（開発・デプロイで難しかった点と学び） |
 
 ## 技術構成
 
 | 役割 | 採用技術 |
 | --- | --- |
 | フロントエンド / API | Next.js 16（App Router）+ TypeScript + Tailwind CSS |
-| DB・ベクトル検索・認証・ファイル | Supabase（PostgreSQL + pgvector + Auth + Storage）、東京リージョン |
-| ホスティング | Vercel（関数リージョン: 東京 `hnd1`。`vercel.json` で指定） |
+| DB・ベクトル検索・認証・ファイル | Supabase（PostgreSQL + pgvector + Auth + Storage）、東京リージョン（作成時に選択したと利用者が報告。管理画面での再確認記録はなし） |
+| ホスティング | Vercel（関数リージョンを東京 `hnd1` に `vercel.json` で指定。関数が実際に `hnd1` で動いているかは管理画面で未確認） |
 | Embedding | OpenAI `text-embedding-3-small`（1536 次元・固定） |
 | 回答生成 | Claude API（既定 `claude-opus-5-5`、effort `low`。許可リスト: opus / sonnet / haiku 5.5） |
 | PDF 解析 | unpdf |
@@ -110,4 +124,16 @@ samples/
 - 質問・本文・秘密情報をログに出さない。モデル許可リスト・再試行・出力上限で課金を制御
 - PDF / CSV / `samples/` / `reports/` / `.env*` は Git 管理外。コミットは GitHub の noreply アドレスで作成
 
-詳細と残る懸念点は [docs/SECURITY.md](docs/SECURITY.md)。
+本番環境での実施状況（2026-11-24）:
+
+| 対策 | 状況 |
+| --- | --- |
+| Vercel の環境変数 | ✅ 5 件を Production に登録。`OPENAI_API_KEY`・`ANTHROPIC_API_KEY` は Secret、その他 3 件は Config。Preview・Development への同じ変数の登録は見つかっていない（Shared 設定は未確認） |
+| Vercel Firewall のレート制限 | ✅ 1 件のルール内で `/api/chat` と `/login` を OR 条件で指定。IP ごとに 60 秒 20 回（2 つのパスで合算）、超過時は Deny（403）。設定後もログイン・AI 検索が正常に動くことを確認済み。**超過時の動作は未検証** |
+| Vercel Deployment Protection | ✅ Vercel Authentication ON（Standard Protection）で Preview を保護、Protected Sourcemaps ON |
+| Supabase Auth | ✅ 新規登録（Allow new users to sign up）OFF、匿名ログイン OFF、メール確認 ON、パスワードは 16 文字以上で英大文字・英小文字・数字・記号が必須（管理画面で確認） |
+| 管理者パスワード | ✅ 管理 API で変更し、新しいパスワードでログイン・ログアウト・再ログインを確認 |
+| セキュリティヘッダー（HSTS・`X-Frame-Options`・`X-Robots-Tag: noindex`） | ✅ 本番 URL の応答で確認 |
+| Supabase の URL 設定（Site URL・Redirect URLs） | 未確認（確認の記録なし） |
+
+詳細と残る懸念点は [docs/SECURITY.md](docs/SECURITY.md)・[docs/DEPLOY_CHECKLIST.md](docs/DEPLOY_CHECKLIST.md)。
